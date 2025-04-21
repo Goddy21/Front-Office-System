@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Front Office Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2 class="sidebar-title">Dashboard</h2>
+      <button onclick="showSection('new')">New Visitors</button>
+      <button onclick="showSection('recent')">Recent Visitors</button>
+      <button onclick="showSection('all')">All Visitors</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="header">
+        <input type="text" id="searchInput" placeholder="Search visitors..." oninput="filterVisitors()" />
+      </div>
+      <div id="contentArea">
+        <h2>Welcome to Front Office</h2>
+        <p>Select a category from the left panel.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

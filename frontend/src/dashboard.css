@@ -1,0 +1,148 @@
+/* Dashboard Container */
+.dashboard-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #fff;
+  font-family: 'Arial', sans-serif;
+  padding: 20px;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background-color: #222;
+  color: #fff;
+  padding: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* Sidebar Heading */
+.sidebar h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #f0f0f0;
+}
+
+/* Sidebar Buttons */
+.sidebar button {
+  display: block;
+  background: linear-gradient(45deg, #00d1b2, #00b89c);
+  border: none;
+  color: #fff;
+  margin: 12px 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.sidebar button:hover {
+  background: linear-gradient(45deg, #00b89c, #00d1b2);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+.sidebar button:active {
+  background: linear-gradient(45deg, #00a18a, #009d7f);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(1px);
+}
+
+.sidebar button.active {
+  background: linear-gradient(45deg, #00d1b2, #00b89c);
+  font-weight: 600;
+  color: #fff;
+  border-left: 4px solid #00b89c;
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #fff;
+  color: #333;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading */
+.main-content h1 {
+  font-size: 24px;
+  color: #2a5298;
+  margin-bottom: 20px;
+}
+
+/* Paragraph */
+.main-content p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* 🔄 Responsive Layout */
+@media (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
+
+  .sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+
+  .sidebar h2 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .sidebar button {
+    font-size: 16px;
+    padding: 10px 16px;
+    text-align: center;
+  }
+
+  .main-content {
+    padding: 15px;
+    font-size: 14px;
+  }
+
+  .main-content h1 {
+    font-size: 20px;
+  }
+
+  .main-content p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar button {
+    font-size: 15px;
+    padding: 10px;
+  }
+
+  .main-content {
+    padding: 10px;
+  }
+
+  .main-content h1 {
+    font-size: 18px;
+  }
+
+  .main-content p {
+    font-size: 13px;
+  }
+}
