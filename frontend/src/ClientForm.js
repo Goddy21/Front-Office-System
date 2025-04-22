@@ -103,7 +103,7 @@ const ClientForm = () => {
         </div>
         <div className="form-group">
         <label>ID Number</label>
-          <input type="text" name="id_number" value={formData.id_number} onChange={handleChange} required />
+          <input type="text" name="id_number" value={formData.id_number} onChange={handleChange} required pattern="[0-9]{8}" />
         </div>
         <div className="form-group">
           <label>Phone Number</label>
@@ -114,10 +114,13 @@ const ClientForm = () => {
           <label>Purpose of Visit</label>
           <select name="issueType" value={formData.issueType} onChange={handleChange} required>
             <option value="">-- Select --</option>
-            <option value="Contract agreement">Licensing</option>
-            <option value="Uploads">Technical</option>
+            <option value="Skiza Tunes">Skiza Tunes</option>
+            <option value="Digital Distribution Service">Digital Distribution Service</option>
             <option value="Payments">Payments</option>
-            <option value="General">General</option>
+            <option value="Youtube Management">YouTube Management</option>
+            <option value="Payments">Payments</option>
+            <option value="Royalty Advances">Royalty Advances</option>
+            <option value="General Inquiries">General Inquiries</option>
           </select>
         </div>
 

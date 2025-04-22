@@ -91,7 +91,7 @@ app.post('/api/visitors', async (req, res) => {
                 <p><strong>Purpose of Visit:</strong> ${issueType}</p>
                 <p><strong>Redirected to:</strong> ${redirectTo}</p>
                 <br/>
-                <p><strong>Click below to confirm service rendered:
+                <p><strong>Click below to view ticket:
                 </strong></p>
                 <a href="${confirmationLink}" style="
                   background-color: #4CAF50;
@@ -100,7 +100,7 @@ app.post('/api/visitors', async (req, res) => {
                   text-decoration: none;
                   border-radius: 5px;
                   font-weight: bold;
-                ">Confirm Visitor Served</a>
+                ">View Ticket</a>
             `
         };
 
