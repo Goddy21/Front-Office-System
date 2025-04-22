@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './style.css';
 
-const Camera = ({ onCapture }) => {
+const Camera = ({ onCapture, reset }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [preview, setPreview] = useState(null);
@@ -32,6 +32,14 @@ const Camera = ({ onCapture }) => {
     setPreview(imageData);
     onCapture(imageData);
   };
+
+  // 👇 Reset preview when `reset` prop is true
+  useEffect(() => {
+    if (reset) {
+      console.log("🔄 Resetting camera preview");
+      setPreview(null);
+    }
+  }, [reset]);
 
   return (
     <div className="camera-container">

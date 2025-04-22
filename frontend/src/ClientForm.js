@@ -9,6 +9,7 @@ const ClientForm = () => {
     last_name:'',
     artist_name:'',
     email: '',
+    id_number:'',
     phone: '',
     issueType: '',
     photo: '',
@@ -17,6 +18,8 @@ const ClientForm = () => {
 
   const [statusMessage, setStatusMessage] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,6 +33,8 @@ const ClientForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setStatusMessage('');
 
     try {
         const response = await fetch('http://localhost:5000/api/visitors', {
@@ -41,6 +46,7 @@ const ClientForm = () => {
         if (response.ok) {
             const data = await response.json();
             setStatusMessage("✅ Visitor received successfully!");
+            setIsSubmitting(false)
             console.log('Visitors details received: ', data);
         } else {
             // Parse the JSON response even for error cases
@@ -65,17 +71,13 @@ const ClientForm = () => {
       last_name:'',
       artist_name:'',
       email: '',
+      id_number:'',
       phone: '',
       issueType: '',
-      platform: '',
-      contentTitle: '',
-      description: '',
       photo: '',
       redirectTo: ''
     });
     setPhotoPreview(null);
-
-    
 };
 
 
@@ -96,8 +98,12 @@ const ClientForm = () => {
           <input type="text" name="artist_name" value={formData.artist_name} onChange={handleChange} required />
         </div>
         <div className="form-group">
-          <label>Email</label>
+        <label>Email</label>
           <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+        </div>
+        <div className="form-group">
+        <label>ID Number</label>
+          <input type="text" name="id_number" value={formData.id_number} onChange={handleChange} required />
         </div>
         <div className="form-group">
           <label>Phone Number</label>
@@ -117,7 +123,7 @@ const ClientForm = () => {
 
         <div className="form-group">
           <label>Capture Visitor Photo</label>
-          <Camera onCapture={handleCapture} />
+          <Camera onCapture={handleCapture} reset={photoPreview === null} />
         </div>
 
         {photoPreview && (
@@ -141,6 +147,13 @@ const ClientForm = () => {
           </select>
         </div>
         <button className="submit-btn" type="submit">Submit</button>
+        <br />
+        {isSubmitting && (
+        <div className="progress-bar-container">
+          <div className="progress-bar"></div>
+          <p>Submitting...</p>
+        </div>
+        )}
         {statusMessage && <p className="status-msg">{statusMessage}</p>}
       </form>
     </div>

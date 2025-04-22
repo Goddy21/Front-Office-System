@@ -10,6 +10,7 @@ const VisitorList = ({ title, visitors = [] }) => {
       ${visitor.first_name} 
       ${visitor.last_name} 
       ${visitor.email} 
+      ${visitor.id_number}
       ${visitor.phone} 
       ${visitor.issueType} 
       ${visitor.redirectTo}
@@ -42,6 +43,7 @@ const VisitorList = ({ title, visitors = [] }) => {
             <div className="visitor-details">
               <p><strong>Name:</strong> {visitor.first_name} {visitor.last_name}</p>
               <p><strong>Email:</strong> {visitor.email}</p>
+              <p><strong>ID Number:</strong>{visitor.id_number}</p>
               <p><strong>Phone:</strong> {visitor.phone}</p>
               <p><strong>Issue Type:</strong> {visitor.issueType}</p>
               <p><strong>Redirected To:</strong> {visitor.redirectTo}</p>

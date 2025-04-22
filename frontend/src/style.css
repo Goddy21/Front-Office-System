@@ -163,7 +163,7 @@ textarea:focus {
 
 /* Special hover effects for buttons */
 .submit-btn:active {
-  background-color: #ff1493;
+  background-color: #00b4d8;
   box-shadow: 0 4px 10px rgba(255, 79, 110, 0.4);
 }
 .photo-preview img {
@@ -181,6 +181,25 @@ input[type="text"], input[type="email"], input[type="text"] textarea {
   font-size: 16px;
   color: #333;
 }
+
+.progress-bar-container {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(90deg, #4caf50 30%, #8bc34a 60%, #00b4d8 90%);
+  animation: loading 2s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(100% + 200px) 0; }
+}
+
 /* Responsive layout tweaks */
 @media (max-width: 768px) {
   .client-form {

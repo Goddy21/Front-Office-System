@@ -41,9 +41,9 @@ pool.connect()
 app.post('/api/visitors', async (req, res) => {
     try {
         console.log('Received data: ', req.body);
-        const { first_name, last_name, artist_name, email, phone, issueType, photo, redirectTo } = req.body;
+        const { first_name, last_name, artist_name, email, phone, issueType, id_number, photo, redirectTo } = req.body;
 
-        if (!first_name || !last_name || !artist_name || !email || !phone || !issueType || !redirectTo || !photo) {
+        if (!first_name || !last_name || !artist_name || !email || !phone || !issueType || !redirectTo || !photo || !id_number) {
             return res.status(400).json({ error: "All fields are required!" });
         }
 
@@ -53,8 +53,8 @@ app.post('/api/visitors', async (req, res) => {
         }
 
         const result = await pool.query(
-            'INSERT INTO visitors (first_name, last_name, artist_name, email, phone, photo, "issueType", "redirectTo") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [first_name, last_name, artist_name, email, phone, photo, issueType, redirectTo]
+            'INSERT INTO visitors (first_name, last_name, artist_name, email, id_number, phone, photo, "issueType", "redirectTo") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [first_name, last_name, artist_name, email, id_number, phone, photo, issueType, redirectTo]
         );
 
         // ✅ Get inserted visitor ID and generate confirmation link
@@ -86,15 +86,17 @@ app.post('/api/visitors', async (req, res) => {
                 <p><strong>Name:</strong> ${first_name} ${last_name}</p>
                 <p><strong>Artist Name:</strong> ${artist_name}</p>
                 <p><strong>Email:</strong> ${email}</p>
+                <p><strong>ID Number:</strong> ${id_number}</p>
                 <p><strong>Phone:</strong> ${phone}</p>
                 <p><strong>Purpose of Visit:</strong> ${issueType}</p>
                 <p><strong>Redirected to:</strong> ${redirectTo}</p>
                 <br/>
-                <p><strong>Click below to confirm service rendered:</strong></p>
+                <p><strong>Click below to confirm service rendered:
+                </strong></p>
                 <a href="${confirmationLink}" style="
                   background-color: #4CAF50;
                   color: white;
-                  padding: 20px 20px;
+                  padding: 10px 20px;
                   text-decoration: none;
                   border-radius: 5px;
                   font-weight: bold;

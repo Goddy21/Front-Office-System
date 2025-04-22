@@ -37,41 +37,46 @@ const Dashboard = () => {
         return <ClientForm addVisitor={addVisitor} />;
   
       case 'recent':
-        // Helper function to normalize names, emails, and phone numbers
         const normalize = (input) => {
           return input
-            ? input.toLowerCase().trim().replace(/\s+/g, ' ') // Normalize spaces and case
+            ? input.toLowerCase().trim().replace(/\s+/g, ' ')
             : '';
         };
-  
-        // Track counts based on normalized name, email, or phone
+        
+        // Track how often each unique identifier (phone, ID, or full name) appears
         const visitorCounts = visitors.reduce((acc, visitor) => {
-          const nameKey = normalize(visitor.name);
-          const emailKey = normalize(visitor.email);
+          const idKey = normalize(visitor.id_number);
           const phoneKey = normalize(visitor.phone);
-  
-          // Using name + email or phone as a combined unique identifier
-          const uniqueKey = nameKey + '|' + emailKey + '|' + phoneKey;
-  
-          if (uniqueKey) {
-            acc[uniqueKey] = (acc[uniqueKey] || 0) + 1;
-          }
+          const nameKey = normalize(visitor.first_name + ' ' + visitor.last_name);
+        
+          const keys = [idKey, phoneKey, nameKey];
+        
+          keys.forEach(key => {
+            if (key) {
+              acc[key] = (acc[key] || 0) + 1;
+            }
+          });
+        
           return acc;
         }, {});
-  
-        // Filter for returning visitors based on the counts of the unique key
+        
+        // Filter visitors who have any identifier that appears more than once
         const returningVisitors = visitors.filter(visitor => {
-          const nameKey = normalize(visitor.name);
-          const emailKey = normalize(visitor.email);
+          const idKey = normalize(visitor.id_number);
           const phoneKey = normalize(visitor.phone);
-  
-          const uniqueKey = nameKey + '|' + emailKey + '|' + phoneKey;
-          return visitorCounts[uniqueKey] > 1;
+          const nameKey = normalize(visitor.first_name + ' ' + visitor.last_name);
+        
+          return (
+            (idKey && visitorCounts[idKey] > 1) ||
+            (phoneKey && visitorCounts[phoneKey] > 1) ||
+            (nameKey && visitorCounts[nameKey] > 1)
+          );
         });
-  
-        console.log('Returning Visitors:', returningVisitors); // Debug output
-  
+        
+        console.log('Returning Visitors:', returningVisitors);
+        
         return <VisitorList title="Returning Visitors" visitors={returningVisitors} />;
+        
   
       case 'all':
         return <VisitorList title="All Visitors" visitors={visitors} />;
