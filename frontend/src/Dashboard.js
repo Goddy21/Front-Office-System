@@ -26,6 +26,21 @@ const Dashboard = () => {
       });
   }, []);
   
+  const deleteVisitor = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/visitors/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setVisitors((prevVisitors) => prevVisitors.filter((visitor) => visitor.id !== id));
+      } else {
+        console.error('Failed to delete visitor');
+      }
+    } catch (err) {
+      console.error('Error deleting visitor:', err);
+    }
+  };
 
   const addVisitor = (visitor) => {
     setVisitors(prev => [visitor, ...prev]);
@@ -75,11 +90,11 @@ const Dashboard = () => {
         
         console.log('Returning Visitors:', returningVisitors);
         
-        return <VisitorList title="Returning Visitors" visitors={returningVisitors} />;
+        return <VisitorList title="Returning Visitors" visitors={returningVisitors} deleteVisitor={deleteVisitor}/>;
         
   
       case 'all':
-        return <VisitorList title="All Visitors" visitors={visitors} />;
+        return <VisitorList title="All Visitors" visitors={visitors} deleteVisitor={deleteVisitor}/>;
   
       default:
         return null;

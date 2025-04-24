@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import './VisitorList.css';
 
-const VisitorList = ({ title, visitors = [] }) => {
+const VisitorList = ({ title, visitors = [], deleteVisitor }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredVisitors = visitors.filter(visitor => {
@@ -56,6 +56,12 @@ const VisitorList = ({ title, visitors = [] }) => {
                   <span style={{ color: 'red' }}>🕒 Not Served</span>
                 )}
               </p>
+              <br />
+              <button className='delete-button'
+                onClick={() => deleteVisitor(visitor.id)}
+              >
+                🗑️ Delete
+              </button>
             </div>
           </li>
         ))}

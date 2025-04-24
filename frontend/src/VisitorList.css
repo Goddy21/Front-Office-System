@@ -60,6 +60,19 @@
 .visitor-details p {
   margin: 4px 0;
 }
+.delete-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.delete-button:hover {
+  background-color: darkred;
+}
 
 /* Responsive styles */
 @media (max-width: 768px) {

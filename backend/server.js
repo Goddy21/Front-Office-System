@@ -59,7 +59,10 @@ app.post('/api/visitors', async (req, res) => {
 
         // ✅ Get inserted visitor ID and generate confirmation link
         const visitorId = result.rows[0].id;
-        const confirmationLink = `http://localhost:5000/api/confirm-visit/${visitorId}`;
+        const issueTypeEncoded = encodeURIComponent(issueType); // Handle spaces, special characters
+        const confirmationLink = `http://localhost:5000/api/view-issue-type/${issueTypeEncoded}`;
+        
+
 
         // ✅ Decide staff email based on redirectTo field
         let staffEmail = '';
@@ -116,7 +119,7 @@ app.post('/api/visitors', async (req, res) => {
     }
 });
 
-app.get('/api/confirm-visit/:id', async (req, res) => {
+app.post('/api/confirm-visit/:id', async (req, res) => {
     const visitorId = req.params.id;
 
     try {
@@ -129,13 +132,17 @@ app.get('/api/confirm-visit/:id', async (req, res) => {
             return res.status(404).send('Visitor not found.');
         }
 
-        res.send(`<h2>✅ Visitor marked as served successfully!</h2>
-                  <p>Name: ${result.rows[0].first_name} ${result.rows[0].last_name}</p>`);
+        res.send(`
+            <h2>✅ Visitor marked as served successfully!</h2>
+            <p>Name: ${result.rows[0].first_name} ${result.rows[0].last_name}</p>
+            <p><a href="/api/view-issue-type/${encodeURIComponent(result.rows[0].issueType)}">🔙 Back to list</a></p>
+        `);
     } catch (error) {
         console.error('Error confirming visitor:', error);
         res.status(500).send('Error confirming visitor.');
     }
 });
+
 
 // GET /api/visitors
 app.get('/api/visitors', async (req, res) => {
@@ -147,6 +154,152 @@ app.get('/api/visitors', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+  app.get('/api/view-issue-type/:issueType', async (req, res) => {
+    const issueType = decodeURIComponent(req.params.issueType);
+
+    try {
+        const result = await pool.query(
+            'SELECT * FROM visitors WHERE "issueType" = $1 ORDER BY timestamp DESC',
+            [issueType]
+        );
+
+        let html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Visitor Tickets</title>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+          <style>
+            body {
+              font-family: 'Inter', sans-serif;
+              background-color: #f8f9fa;
+              padding: 40px;
+              color: #333;
+            }
+            h2 {
+              text-align: center;
+              margin-bottom: 20px;
+              color: #2c3e50;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              background-color: #fff;
+              border-radius: 8px;
+              overflow: hidden;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            }
+            th, td {
+              padding: 12px 16px;
+              text-align: left;
+              border-bottom: 1px solid #eaeaea;
+            }
+            th {
+              background-color: #f0f2f5;
+              font-weight: 600;
+            }
+            tr:hover {
+              background-color: #f9f9f9;
+            }
+            button {
+              background-color: #28a745;
+              color: white;
+              border: none;
+              padding: 8px 14px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-weight: 600;
+            }
+            button:hover {
+              background-color: #218838;
+            }
+            .status {
+              font-weight: bold;
+            }
+            .served {
+              color: green;
+            }
+            .not-served {
+              color: red;
+            }
+            form {
+              margin: 0;
+            }
+          </style>
+        </head>
+        <body>
+        
+        <h2>Visitors with Issue Type: ${issueType}</h2>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Issue Type</th>
+            <th>Email</th>
+            <th>Served</th>
+            <th>Action</th>
+          </tr>
+        `;
+        
+
+        result.rows.forEach(visitor => {
+            html += `
+              <tr>
+                <td>${visitor.first_name} ${visitor.last_name}</td>
+                <td>${visitor.issueType}</td>
+                <td>${visitor.email}</td>
+                <td class="status ${visitor.served ? 'served' : 'not-served'}">
+                  ${visitor.served ? '✅ Served' : '❌ Not served'}
+                </td>
+                <td>
+                  ${
+                    visitor.served
+                      ? 'Already served'
+                      : `<form action="/api/confirm-visit/${visitor.id}" method="POST">
+                          <button type="submit">Mark as Served</button>
+                         </form>`
+                  }
+                </td>
+              </tr>
+            `;
+          });
+          
+
+        html += `
+        </table>
+        </body>
+        </html>
+        `;
+        res.send(html);
+
+    } catch (error) {
+        console.error('Error fetching visitors by issue type:', error);
+        res.status(500).send('Error fetching visitors.');
+    }
+});
+
+
+
+// Route to delete a visitor by ID
+app.delete('/api/visitors/:id', async (req, res) => {
+    const visitorId = req.params.id;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM visitors WHERE id = $1 RETURNING *',
+            [visitorId]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Visitor not found.' });
+        }
+
+        res.status(200).json({ message: 'Visitor deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting visitor:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
   
 
 const PORT = process.env.PORT || 5000;
