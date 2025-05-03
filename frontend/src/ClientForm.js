@@ -121,6 +121,7 @@ const ClientForm = () => {
             <option value="Payments">Payments</option>
             <option value="Royalty Advances">Royalty Advances</option>
             <option value="General Inquiries">General Inquiries</option>
+            <option value="Contract Agreement">Contract Agreement</option>
           </select>
         </div>
 
