@@ -29,7 +29,7 @@ const createVisitor = async (req, res) => {
     );
 
     const visitorId = result.rows[0].id;
-    await initializeAgreementSteps(visitorId);
+    //await initializeAgreementSteps(visitorId);
     //const confirmationLink = `http://localhost:5000/api/view-issue-type/${encodeURIComponent(issueType)}`;
     const confirmationLink = `http://localhost:5000/api/visitors/view-issue-type/${encodeURIComponent(issueType)}`;
 
@@ -39,7 +39,10 @@ const createVisitor = async (req, res) => {
     else if (redirectTo.includes('Lilian')) staffEmail = 'lilian@example.com';
     else if (redirectTo.includes('Ann')) staffEmail = 'ann@example.com';
     else if (redirectTo.includes('Edwin')) staffEmail = 'edwin@example.com';
-
+    if (issueType === 'Contract Agreement') {
+      await initializeAgreementSteps(visitorId);
+    }
+    
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: staffEmail,
@@ -81,22 +84,24 @@ const confirmVisit = async (req, res) => {
   const visitorId = req.params.id;
 
   try {
+    const checkResult = await pool.query('SELECT * FROM visitors WHERE id = $1', [visitorId]);
+
+    if (checkResult.rowCount === 0) {
+      return res.status(404).json({ error: 'Visitor not found.' });
+    }
+
+    if (checkResult.rows[0].served) {
+      return res.status(400).json({ error: 'Visitor has already been marked as served.' });
+    }
+
     const result = await pool.query(
       'UPDATE visitors SET served = TRUE WHERE id = $1 RETURNING *',
       [visitorId]
     );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Visitor not found.' });
-    }
-
-    if (result.rows[0].served) {
-      return res.status(400).json({ error: 'Visitor has already been marked as served.' });
-    }
-
     res.status(200).json({
       message: 'Visitor marked as served successfully!',
-      visitor: result.rows[0], 
+      visitor: result.rows[0],
     });
 
   } catch (error) {
@@ -187,6 +192,7 @@ const getVisitorsByIssueType = async (req, res) => {
         <th>Name</th>
         <th>Issue Type</th>
         <th>Email</th>
+        <th>Status</th>
         <th>Served</th>
         <th>Action</th>
       </tr>
@@ -198,6 +204,18 @@ const getVisitorsByIssueType = async (req, res) => {
           <td>${visitor.first_name} ${visitor.last_name}</td>
           <td>${visitor.issueType}</td>
           <td>${visitor.email}</td>
+          <td>
+            <strong>Status:</strong> ${visitor.contract_status}
+          </td>
+          
+          ${visitor.issueType === 'Contract Agreement' ? `
+            <td>
+              <form action="/start-contract/${visitor.id}" method="GET">
+                <button type="submit">Start Contract</button>
+              </form>
+            </td>
+          ` : '<td></td>'}          
+
           <td class="status ${visitor.served ? 'served' : 'not-served'}">
             ${visitor.served ? '✅ Served' : '❌ Not served'}
           </td>
@@ -222,8 +240,8 @@ const getVisitorsByIssueType = async (req, res) => {
       <script>
         async function confirmVisit(visitorId) {
           try {
-            const response = await fetch('/api/visitors/confirm/' + visitorId, {
-              method: 'PUT'
+            const response = await fetch('/api/visitors/confirm-visit/' + visitorId, {
+              method: 'PATCH'
             });
 
             if (response.ok) {
@@ -273,6 +291,7 @@ const deleteVisitor = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 module.exports = {
   createVisitor,

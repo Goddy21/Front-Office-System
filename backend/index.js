@@ -11,9 +11,10 @@ app.use(cors());
 const visitorRoutes = require('./routes/visitors');
 const stepRoutes = require('./routes/steps');
 
-
 app.use('/api/visitors', visitorRoutes);
+
 app.use('/api/steps', stepRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
