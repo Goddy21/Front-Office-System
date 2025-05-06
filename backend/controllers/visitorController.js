@@ -210,7 +210,7 @@ const getVisitorsByIssueType = async (req, res) => {
           
           ${visitor.issueType === 'Contract Agreement' ? `
             <td>
-              <form action="/start-contract/${visitor.id}" method="GET">
+              <form action="/api/visitors/start-contract/${visitor.id}" method="GET">
                 <button type="submit">Start Contract</button>
               </form>
             </td>
