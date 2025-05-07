@@ -1,12 +1,25 @@
+// stepController.js
 const pool = require('../config/db');
 
 exports.completeStep = async (req, res) => {
   const { id } = req.params;
   const { step_name } = req.body;
 
+  // Add data validation here (e.g., using a library like Joi)
+
   try {
+    // Check if the step is already completed
+    const checkResult = await pool.query(
+      'SELECT completed FROM agreement_steps WHERE visitor_id = $1 AND step_name = \$2',
+      [id, step_name]
+    );
+
+    if (checkResult.rows.length > 0 && checkResult.rows[0].completed) {
+      return res.status(200).json({ message: `Step '${step_name}' already completed.`, step: { visitor_id: id, step_name: step_name, completed: true } }); // Or 208 Already Reported
+    }
+
     const result = await pool.query(
-      'UPDATE agreement_steps SET completed = TRUE WHERE visitor_id = $1 AND step_name = $2 RETURNING *',
+      'UPDATE agreement_steps SET completed = TRUE WHERE visitor_id = $1 AND step_name = $2 AND completed = FALSE RETURNING *',
       [id, step_name]
     );
 
@@ -38,3 +51,5 @@ exports.getSteps = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+

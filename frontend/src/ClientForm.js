@@ -63,9 +63,9 @@ const ClientForm = () => {
     } catch (error) {
         console.error('Error', error);
         setStatusMessage("Network error.  Could not connect to the server.");
-    }
-
-    // Clear form
+    } finally{
+      setIsSubmitting(false);
+          // Clear form
     setFormData({
       first_name: '',
       last_name:'',
@@ -78,6 +78,7 @@ const ClientForm = () => {
       redirectTo: ''
     });
     setPhotoPreview(null);
+    }
 };
 
 
