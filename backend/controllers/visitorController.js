@@ -193,6 +193,7 @@ const getVisitorsByIssueType = async (req, res) => {
         <th>Issue Type</th>
         <th>Email</th>
         <th>Status</th>
+        <th>Service</th>
         <th>Served</th>
         <th>Action</th>
       </tr>
