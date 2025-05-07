@@ -247,6 +247,40 @@ const getContractSteps = async (req, res) => {
     }
   };
 
+  const markAsServed = async (req, res) => {
+    const visitorId = parseInt(req.params.id, 10); // Ensure it's an integer
+
+    if (isNaN(visitorId)) {
+        return res.status(400).json({ error: 'Invalid visitor ID.' });
+    }
+
+    try {
+        const checkResult = await pool.query('SELECT * FROM visitors WHERE id = $1', [visitorId]);
+
+        if (checkResult.rowCount === 0) {
+            return res.status(404).json({ error: 'Visitor not found.' });
+        }
+
+        if (checkResult.rows[0].served) {
+            return res.status(400).json({ error: 'Visitor has already been marked as served.' });
+        }
+
+        const result = await pool.query(
+            'UPDATE visitors SET served = TRUE WHERE id = $1 RETURNING *',
+            [visitorId]
+        );
+
+        res.status(200).json({
+            message: 'Visitor marked as served successfully!',
+            visitor: result.rows[0],
+        });
+    } catch (error) {
+        console.error('Error confirming visitor:', error);
+        res.status(500).json({ error: 'Error confirming visitor.', details: error.message });
+    }
+};
+
+
   const getAllContractStatuses = async () => {
     try {
       const result = await pool.query(`
@@ -255,6 +289,7 @@ const getContractSteps = async (req, res) => {
           v.first_name || ' ' || v.last_name AS full_name, 
           v.email, 
           v.contract_status,
+          v.served,
           a.step_name, 
           a.completed, 
           a.timestamp
@@ -309,7 +344,7 @@ const getContractSteps = async (req, res) => {
     const result = await pool.query(`
       SELECT 
         v.id AS visitor_id, 
-        v.first_name || ' ' || v.last_name AS full_name,  -- Concatenate first_name and last_name
+        v.first_name || ' ' || v.last_name AS full_name,  
         v.email, 
         v.contract_status,
         a.step_name, 
@@ -411,7 +446,8 @@ const getContractSteps = async (req, res) => {
     getAllContractStatusesRaw,
     startContract,
     contractsOverview,
-    contractStatus 
+    contractStatus,
+    markAsServed 
   };
   
   

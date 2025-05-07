@@ -1,12 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+
 const {
   completeAgreementStep,
   declineVisitor,
   getContractSteps,
   contractsOverview,
-  contractStatus
+  contractStatus,
+  markAsServed
 } = require('./contract-agreement/contract_agreement');
 const agreementRoutes = require('./routes/agreement');
 
@@ -33,6 +35,7 @@ app.get('/api/contract/status', contractStatus);
 app.post('/complete-agreement-step', completeAgreementStep);
 app.post('/decline-visitor/:visitorId', declineVisitor);
 app.get('/contract-steps/:visitorId', getContractSteps);
+app.post('/api/markAsServed/:id', markAsServed);
 
 
 
