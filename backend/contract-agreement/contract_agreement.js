@@ -101,11 +101,11 @@ const startContract = async (req, res) => {
              <ul>
         `;
 
-        /*result.rows.forEach(step => {
+        result.rows.forEach(step => {
             html += `<li class="${step.completed ? 'completed' : 'pending'}">
            ${step.step_name.replace('_', ' ')} - ${step.completed ? '✅ Completed' : '❌ Pending'}
          </li>`;
-        });*/
+        });
 
         html += `
              </ul>
@@ -179,13 +179,13 @@ const updateContractStatus = async (visitorId) => {
   
 
   const completeAgreementStep = async (req, res) => {
-    const { visitorId, stepName } = req.body;
+    const { visitorId, stepName, id_number } = req.body;
     const files = req.files;
     console.log("Received form data:", req.body);
     console.log("Step Name Received:", stepName);
-
+  
     try {
-      // 1. Update agreement steps
+      // 1. Update main step
       const update = await pool.query(
         'UPDATE agreement_steps SET completed = true WHERE visitor_id = $1 AND step_name = $2 RETURNING *',
         [visitorId, stepName]
@@ -199,20 +199,43 @@ const updateContractStatus = async (visitorId) => {
       const songs = files && files['songs'] ? files['songs'].map(f => f.path) : [];
       const artwork = files && files['artwork'] ? files['artwork'][0].path : null;
   
-      // Log file details for debugging
       console.log("Uploaded Songs:", songs);
       console.log("Uploaded Artwork:", artwork);
   
-      // 3. Update visitor status
+      // 3. Mark songs and artwork as completed if they exist
+      if (songs.length > 0) {
+        await pool.query(
+          'UPDATE agreement_steps SET completed = true WHERE visitor_id = $1 AND step_name = $2',
+          [visitorId, 'songs_submitted']
+        );
+      }
+  
+      if (artwork) {
+        await pool.query(
+          'UPDATE agreement_steps SET completed = true WHERE visitor_id = $1 AND step_name = $2',
+          [visitorId, 'artwork_submitted']
+        );
+      }
+  
+      // 4. Mark ID input as completed if an ID was provided
+      if (id_number && id_number.trim() !== "") {
+        await pool.query(
+          'UPDATE agreement_steps SET completed = true WHERE visitor_id = $1 AND step_name = $2',
+          [visitorId, 'id_input']
+        );
+      }
+  
+      // 5. Update visitor status
       await updateContractStatus(visitorId);
   
-      // 4. Respond with success message
+      // 6. Final response
       res.status(200).json({ message: `Step "${stepName}" marked as completed.` });
     } catch (err) {
       console.error('Error completing step:', err);
       res.status(500).json({ error: 'Internal server error' });
     }
   };
+  
   
 
   // contract_agreement.js
@@ -280,6 +303,46 @@ const getContractSteps = async (req, res) => {
     }
 };
 
+const terminateContract = async (req, res) => {
+    const visitorId = req.params.visitorId;
+  try {
+    await pool.query(`
+      UPDATE visitors
+      SET contract_status = 'pending', served = false
+      WHERE id = $1
+    `, [visitorId]);
+
+    await pool.query(`
+      DELETE FROM agreement_steps
+      WHERE visitor_id = $1
+    `, [visitorId]);
+
+    res.status(200).send({ message: 'Contract terminated.' });
+  } catch (err) {
+    console.error('Error terminating contract:', err);
+    res.status(500).send({ error: 'Failed to terminate contract.' });
+  }
+}
+
+const deleteContract = async (req, res) => {
+  const visitorId = req.params.visitorId;
+  try {
+    await pool.query(`
+      DELETE FROM agreement_steps
+      WHERE visitor_id = $1
+    `, [visitorId]);
+
+    await pool.query(`
+      DELETE FROM visitors
+      WHERE id = $1
+    `, [visitorId]);
+
+    res.status(200).send({ message: 'Contract and visitor deleted.' });
+  } catch (err) {
+    console.error('Error deleting contract:', err);
+    res.status(500).send({ error: 'Failed to delete contract.' });
+  }
+}
 
   const getAllContractStatuses = async () => {
     try {
@@ -301,7 +364,8 @@ const getContractSteps = async (req, res) => {
       console.log("Database result:", result.rows);
   
       if (!result.rows || result.rows.length === 0) {
-        throw new Error('No contract statuses found');
+        console.log('No contract statuses found');
+        return [];
       }
   
       // Use reduce to group the steps by visitor_id
@@ -311,9 +375,11 @@ const getContractSteps = async (req, res) => {
         if (!acc[visitorId]) {
           acc[visitorId] = {
             visitor_id: visitorId,
+            id: visitorId,
             full_name: row.full_name,
             email: row.email,
             contract_status: row.contract_status,
+            served: row.served,
             steps: []
           };
         }
@@ -397,7 +463,7 @@ const getContractSteps = async (req, res) => {
       const query = `
         SELECT 
           v.id AS visitor_id, 
-          v.first_name || ' ' || v.last_name AS full_name,  -- Concatenate first_name and last_name
+          v.first_name || ' ' || v.last_name AS full_name, 
           v.email, 
           v.contract_status, 
           a.step_name, 
@@ -447,7 +513,9 @@ const getContractSteps = async (req, res) => {
     startContract,
     contractsOverview,
     contractStatus,
-    markAsServed 
+    markAsServed,
+    terminateContract,
+    deleteContract 
   };
   
   

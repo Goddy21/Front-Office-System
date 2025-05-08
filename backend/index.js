@@ -8,7 +8,9 @@ const {
   getContractSteps,
   contractsOverview,
   contractStatus,
-  markAsServed
+  markAsServed,
+  terminateContract,
+  deleteContract
 } = require('./contract-agreement/contract_agreement');
 const agreementRoutes = require('./routes/agreement');
 
@@ -36,7 +38,8 @@ app.post('/complete-agreement-step', completeAgreementStep);
 app.post('/decline-visitor/:visitorId', declineVisitor);
 app.get('/contract-steps/:visitorId', getContractSteps);
 app.post('/api/markAsServed/:id', markAsServed);
-
+app.post('/api/terminateContract/:visitorId', terminateContract);
+app.delete('/api/deleteContract/:visitorId', deleteContract);
 
 
 app.get('/', (req, res) => {

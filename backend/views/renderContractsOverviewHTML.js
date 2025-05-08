@@ -112,7 +112,18 @@ function renderContractsOverviewHTML(contracts) {
             }
 
             button:hover {
-                background-color: #2980b9; /* Peter River */
+                background-color: #2980b9;
+            }
+            .action-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-top: 1rem;
+            }
+
+            .action-buttons button {
+                flex: 1 1 auto;
+                min-width: 140px;
             }
         </style>
         <script>
@@ -133,43 +144,91 @@ function renderContractsOverviewHTML(contracts) {
                         alert('An error occurred while marking visitor as served.');
                     });
             }
+            function terminateContract(visitorId) {
+                if (confirm("Are you sure you want to terminate this contract?")) {
+                    fetch('/api/terminateContract/' + visitorId, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Contract terminated.');
+                            window.location.reload();
+                        } else {
+                            alert('Failed to terminate contract.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error terminating contract:', error);
+                        alert('An error occurred.');
+                    });
+                }
+            }
+
+            function deleteContract(visitorId) {
+                if (confirm("This will permanently delete the visitor and contract. Proceed?")) {
+                    fetch('/api/deleteContract/' + visitorId, { method: 'DELETE' })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Contract deleted.');
+                            window.location.reload();
+                        } else {
+                            alert('Failed to delete contract.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting contract:', error);
+                        alert('An error occurred.');
+                    });
+                }
+            }
         </script>
     </head>
     <body>
         <h1>Contracts Overview</h1>
-        ${contracts.map(visitor => {
-            const visitorId = visitor?.id ?? null; 
+        ${contracts.length === 0 ? `
+            <div style="text-align:center; margin-top:2rem; color:#888; font-size:1.2rem;">
+              No contracts available at the moment.
+            </div>
+          ` : contracts.map(visitor => {
             return `
-                <div class="contract">
-                    <h2>${visitor.full_name}</h2>
-                    <p><strong>Email:</strong> ${visitor.email}</p>
-                    <p><strong>Status:</strong> <span class="status ${visitor.served ? 'served' : 'not-served'}">${visitor.served ? 'Served' : 'Not Served'}</span></p>
-                    <ul>
-                        ${visitor.steps.map(step => `
-                            <li>${step.step_name}: ${step.completed ? '✅ Completed' : '❌ Incomplete'}</li>
-                        `).join('')}
-                    </ul>
-                    <table>
-                        <tr>
-                            <th>Served Status</th>
-                            <th>Action</th>
-                        </tr>
-                        <tr>
-                            <td class="status-cell">
-                                ${visitor.served ? '✅ Served' : '❌ Not served'}
-                            </td>
-                            <td>
-                                ${!visitor.served ? `
-                                    <form id="confirm-form-${visitorId}">
-                                        <button type="button" onclick="confirmVisit(${visitorId})">Mark as Served</button>
-                                    </form>` : '✅ Already served'
-                                }
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+              <div class="contract">
+                <h2>${visitor.full_name}</h2>
+                <p><strong>Email:</strong> ${visitor.email}</p>
+                <p><strong>Status:</strong> 
+                    <span class="status ${visitor.served ? 'served' : 'not-served'}">
+                        ${visitor.served ? 'Served' : 'Not Served'}
+                    </span>
+                </p>
+                <ul>
+                    ${visitor.steps.map(step => `
+                        <li>${step.step_name}: ${step.completed ? '✅ Completed' : '❌ Incomplete'}</li>
+                    `).join('')}
+                </ul>
+                <table>
+                    <tr>
+                        <th>Served Status</th>
+                        <th>Action</th>
+                    </tr>
+                    <tr>
+                        <td class="status-cell">
+                            ${visitor.served ? '✅ Served' : '❌ Not served'}
+                        </td>
+                        <td colspan="2">
+                            <div class="action-buttons">
+                                ${!visitor.served && visitor.id !== undefined ? `
+                                    <button type="button" onclick="confirmVisit('${visitor.id}')">Mark as Served</button>
+                                ` : ''}
+                                <button type="button" onclick="terminateContract('${visitor.id}')" style="background-color: #e67e22;">
+                                    Terminate Contract
+                                </button>
+                                <button type="button" onclick="deleteContract('${visitor.id}')" style="background-color: #c0392b;">
+                                    Delete Contract
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+              </div>
             `;
-        }).join('')}
+          }).join('')}                  
     </body>
     </html>
     `;
