@@ -229,7 +229,8 @@ const updateContractStatus = async (visitorId) => {
       await updateContractStatus(visitorId);
   
       // 6. Final response
-      res.status(200).json({ message: `Step "${stepName}" marked as completed.` });
+      //res.status(200).json({ message: `Step "${stepName}" marked as completed.` });
+      return res.redirect('http://localhost:5000/contracts-overview');
     } catch (err) {
       console.error('Error completing step:', err);
       res.status(500).json({ error: 'Internal server error' });

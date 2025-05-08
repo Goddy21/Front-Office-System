@@ -190,7 +190,7 @@ input[type="text"], input[type="email"], input[type="text"] textarea {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: linear-gradient(90deg, #4caf50 30%, #8bc34a 60%, #00b4d8 90%);
+  background: linear-gradient(90deg, #e0f7fa 0%, #4caf50 20%, #8bc34a 50%, #00b4d8 80%, #e1f5fe 100%);
   animation: loading 2s infinite;
   border-radius: 4px;
 }
